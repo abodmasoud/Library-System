@@ -21,61 +21,54 @@ class ApiController extends Controller
 
     public function login(Request $request)
     {
-        if(!Auth::attempt(['email' => $request->email, 'password' => $request->password])){
+        if (!Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
             return response()->json([
                 "success" => false,
                 "status" => 200
             ]);
         }
         $user = auth()->user();
-        $token = $user->createToken('token',['all:users']);
+        $token = $user->createToken('token', ['all:users']);
 
         return $token->plainTextToken;
     }
 
     public function register(Request $request)
     {
-        // $request->validate([
-        //     'name'=>'required|min:2|max:100',
-        //     'email'=>'required|email|unique:users',
-        //     'password'=>'required|min:6|max:100',
-        //     'confirm_password'=>'required|same:password'
-        // ]);
 
         $validator = Validator::make($request->all(), [
-            'name'=>'required|min:2|max:100',
-            'email'=>'required|email|unique:users',
-            'password'=>'required|min:6|max:100',
-            'confirm_password'=>'required|same:password'
+            'name' => 'required|min:2|max:100',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|min:6|max:100',
+            'confirm_password' => 'required|same:password'
         ]);
 
-        if($validator->fails()){
+        if ($validator->fails()) {
             return response()->json([
-                'message'=>'Validations fails',
-                'errors'=>$validator->errors()
-            ],422);
+                'message' => 'Validations fails',
+                'errors' => $validator->errors()
+            ], 422);
         }
 
         $user = User::create([
-           'name'=>$request->name,
-           'email'=>$request->email,
-           'password'=>Hash::make($request->password)
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password)
         ]);
 
         return response()->json([
-            'message'=>'Registration Successfull',
-            'data'=>$user
-        ],200);
-
+            'message' => 'Registration Successfull',
+            'data' => $user
+        ], 200);
     }
 
     public function getUsers(Request $request)
     {
 
         $user = auth()->user();
-        if($user->tokenCan('all:users')){
+        if ($user->tokenCan('all:users')) {
             $users = User::all();
-             return response()->json([
+            return response()->json([
                 "success" => true,
                 "data" => $users,
                 "status" => 200
@@ -83,7 +76,6 @@ class ApiController extends Controller
         }
 
         return response()->json(["success" => false]);
-
     }
 
     public function logout(Request $request)
@@ -91,7 +83,7 @@ class ApiController extends Controller
         $request->user()->currentAccessToken()->delete();
         return response()->json([
             'message' => 'User successfully logout',
-        ],200);
+        ], 200);
     }
 
     /**
